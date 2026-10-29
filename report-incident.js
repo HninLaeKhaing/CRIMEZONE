@@ -32,6 +32,16 @@ function clearFormMessage() {
   formMessage.classList.remove('error');
 }
 
+async function readApiResponse(response, fallbackMessage) {
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('Report services are unavailable on this static deployment. Deploy the CrimeZone server to submit reports.');
+  }
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || fallbackMessage);
+  return result;
+}
+
 function readPhoto(file) {
   return new Promise((resolve, reject) => {
     if (!file) {
@@ -117,8 +127,7 @@ form.addEventListener('submit', async (event) => {
         photo,
       }),
     });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'The report could not be submitted.');
+    const result = await readApiResponse(response, 'The report could not be submitted.');
 
     state.reportRef = result.reference;
     state.isFlagged = false;
@@ -148,8 +157,7 @@ flagReportBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: '{}',
     });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'The report could not be flagged.');
+    await readApiResponse(response, 'The report could not be flagged.');
     state.isFlagged = true;
     flagReportBtn.textContent = 'Report flagged for review';
   } catch (error) {

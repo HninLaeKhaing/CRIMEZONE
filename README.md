@@ -22,6 +22,8 @@ Every served page includes a draggable CrimeZone Safety Guide chat button. The c
 
 The admin overview and report APIs are protected by server-side session checks. Do not deploy the site through a static file server if you need protected admin data. In production, use HTTPS, set `NODE_ENV=production` so session cookies are marked `Secure`, and keep `ADMIN_PASSWORD` in the hosting provider's secret/environment configuration rather than in source control.
 
+GitHub Pages can host the public HTML, CSS, JavaScript, and image assets, but it cannot run `server.js`. As a result, `/admin/login` returns 404 and report submission requests receive an HTML 404 page instead of the JSON API response when the project is opened only through GitHub Pages. Deploy the project as a Node.js web service (for example on Render or Railway) to enable `/api/reports`, `/api/admin/login`, and `/admin`.
+
 The server binds to `127.0.0.1` by default for local development. Set `HOST=0.0.0.0` only when your deployment platform requires an externally reachable container port; put it behind HTTPS and a trusted reverse proxy.
 
 The overview distinguishes community-submitted reports from official crime data. A submitted report starts in the **Pending review** workflow state; this is not evidence that a crime occurred. The current admin server has no official crime-data feed configured.
