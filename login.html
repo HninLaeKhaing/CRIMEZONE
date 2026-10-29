@@ -1,0 +1,1123 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrimeZone | User Login</title>
+  <meta name="description" content="Secure login to CrimeZone Investigation Portal." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --red: #ff2040;
+      --red-glow: rgba(255, 32, 64, 0.4);
+      --red-soft: rgba(255, 32, 64, 0.1);
+      --bg: #04040a;
+      --card: rgba(10, 10, 22, 0.85);
+      --border: rgba(255, 32, 64, 0.2);
+      --text: #f0f0f8;
+      --muted: #8888aa;
+      --dim: #44445a;
+      --font: 'Inter', sans-serif;
+      --title: 'Orbitron', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden
+    }
+
+    /* BG */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 50%, rgba(255, 32, 64, 0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 85% 50%, rgba(255, 32, 64, 0.04) 0%, transparent 65%)
+    }
+
+    /* PARTICLES */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .p {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 32, 64, 0.55);
+      animation: floatUp linear infinite
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0
+      }
+
+      10% {
+        opacity: 1
+      }
+
+      90% {
+        opacity: .3
+      }
+
+      100% {
+        transform: translateY(-40px) scale(1.5);
+        opacity: 0
+      }
+    }
+
+    /* RADAR BG */
+    .radar-bg {
+      position: fixed;
+      left: -160px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 480px;
+      height: 480px;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .rr {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 32, 64, 0.14);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: rp 3s ease-out infinite
+    }
+
+    .rr:nth-child(1) {
+      width: 100%;
+      height: 100%;
+      animation-delay: 0s
+    }
+
+    .rr:nth-child(2) {
+      width: 72%;
+      height: 72%;
+      animation-delay: .5s
+    }
+
+    .rr:nth-child(3) {
+      width: 46%;
+      height: 46%;
+      animation-delay: 1s
+    }
+
+    .rr:nth-child(4) {
+      width: 24%;
+      height: 24%;
+      animation-delay: 1.5s
+    }
+
+    @keyframes rp {
+
+      0%,
+      100% {
+        opacity: .5
+      }
+
+      50% {
+        opacity: .12
+      }
+    }
+
+    .rsweep {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(255, 32, 64, 0.18) 0deg, transparent 70deg);
+      animation: rspin 4s linear infinite
+    }
+
+    @keyframes rspin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .rdot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 12px var(--red), 0 0 24px var(--red-glow);
+      transform: translate(-50%, -50%)
+    }
+
+    .blip {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+      animation: bf 3s ease-in-out infinite
+    }
+
+    @keyframes bf {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scale(.5)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    /* INDIA SVG BG */
+    .map-bg {
+      position: fixed;
+      right: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 480px;
+      opacity: .05;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    /* LAYOUT */
+    .layout {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px
+    }
+
+    /* LOGO */
+    .logo-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 34px
+    }
+
+    .logo-icon {
+      animation: pl 2.5s ease-in-out infinite
+    }
+
+    @keyframes pl {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 6px rgba(255, 32, 64, .5))
+      }
+
+      50% {
+        filter: drop-shadow(0 0 16px rgba(255, 32, 64, .9))
+      }
+    }
+
+    .logo-text {
+      font-family: var(--title);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: var(--text)
+    }
+
+    .logo-text span {
+      color: var(--red)
+    }
+
+    .logo-tag {
+      font-size: 10px;
+      letter-spacing: 3px;
+      font-weight: 600;
+      color: var(--dim);
+      text-transform: uppercase;
+      margin-top: -2px
+    }
+
+    .login-home-link {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      text-decoration: none;
+      transition: color .2s ease
+    }
+
+    .login-home-link:hover { color: var(--text) }
+
+    /* CARD */
+    .card {
+      width: min(420px, 95vw);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px 32px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 0 0 1px rgba(255, 32, 64, .06), 0 24px 64px rgba(0, 0, 0, .7), 0 0 80px rgba(255, 32, 64, .05), inset 0 1px 0 rgba(255, 255, 255, .05);
+      animation: ci .6s cubic-bezier(.4, 0, .2, 1)
+    }
+
+    @keyframes ci {
+      from {
+        opacity: 0;
+        transform: translateY(28px) scale(.97)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    /* CARD HEADER */
+    .ch {
+      text-align: center;
+      margin-bottom: 30px
+    }
+
+    .cicon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--red-soft);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 20px var(--red-glow);
+      animation: ip 2s ease-in-out infinite
+    }
+
+    @keyframes ip {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(255, 32, 64, .3)
+      }
+
+      50% {
+        box-shadow: 0 0 32px rgba(255, 32, 64, .6)
+      }
+    }
+
+    .ctitle {
+      font-family: var(--title);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin-bottom: 5px
+    }
+
+    .csub {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .3px
+    }
+
+    /* FORM */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase
+    }
+
+    .iw {
+      position: relative;
+      display: flex;
+      align-items: center
+    }
+
+    .iico {
+      position: absolute;
+      left: 13px;
+      color: var(--muted);
+      pointer-events: none;
+      transition: color .25s
+    }
+
+    .iw:focus-within .iico {
+      color: var(--red)
+    }
+
+    .iw input {
+      width: 100%;
+      padding: 13px 16px 13px 42px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .25s, box-shadow .25s, background .25s;
+      letter-spacing: .3px
+    }
+
+    .iw input::placeholder {
+      color: var(--dim)
+    }
+
+    .iw input:focus {
+      border-color: rgba(255, 32, 64, .5);
+      background: rgba(255, 32, 64, .04);
+      box-shadow: 0 0 0 3px rgba(255, 32, 64, .08)
+    }
+
+    .iw input[type=password] {
+      padding-right: 44px
+    }
+
+    .pwtog {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--dim);
+      padding: 4px;
+      transition: color .2s
+    }
+
+    .pwtog:hover {
+      color: var(--text)
+    }
+
+    /* ERROR */
+    .iw.err input {
+      border-color: rgba(255, 32, 64, .7);
+      background: rgba(255, 32, 64, .06);
+      animation: shake .35s cubic-bezier(.36, .07, .19, .97)
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      20% {
+        transform: translateX(-8px)
+      }
+
+      40% {
+        transform: translateX(8px)
+      }
+
+      60% {
+        transform: translateX(-5px)
+      }
+
+      80% {
+        transform: translateX(5px)
+      }
+    }
+
+    .emsg {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 32, 64, .08);
+      border: 1px solid rgba(255, 32, 64, .25);
+      font-size: 12px;
+      color: #ff6070
+    }
+
+    .emsg.show {
+      display: flex
+    }
+
+    /* META */
+    .fmeta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .rem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer
+    }
+
+    .rem input {
+      accent-color: var(--red)
+    }
+
+    .fgt {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s
+    }
+
+    .fgt:hover {
+      color: var(--red)
+    }
+
+    /* DEMO HINT */
+    .hint {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 215, 0, .05);
+      border: 1px solid rgba(255, 215, 0, .18);
+      font-size: 11.5px;
+      color: rgba(255, 215, 0, .8);
+      text-align: center;
+      line-height: 1.7
+    }
+
+    .hint strong {
+      color: #ffd700
+    }
+
+    /* LOGIN BTN */
+    .lbtn {
+      position: relative;
+      overflow: hidden;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #cc0028, #ff2040, #ff4060);
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(255, 32, 64, .4);
+      transition: transform .2s, box-shadow .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px
+    }
+
+    .lbtn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .15), transparent);
+      opacity: 0;
+      transition: opacity .2s
+    }
+
+    .lbtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(255, 32, 64, .5)
+    }
+
+    .lbtn:hover::before {
+      opacity: 1
+    }
+
+    .lbtn:active {
+      transform: translateY(0)
+    }
+
+    .lbtn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .lbtn.loading .spin {
+      display: block
+    }
+
+    .lbtn.loading .btext {
+      opacity: .5
+    }
+
+    .spin {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: sp .7s linear infinite
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* DIVIDER */
+    .div {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--dim)
+    }
+
+    .div::before,
+    .div::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, .06)
+    }
+
+    /* REG ROW */
+    .rrow {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--muted)
+    }
+
+    .rrow a {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .2s
+    }
+
+    .rrow a:hover {
+      color: #ff6070
+    }
+
+    /* SUCCESS */
+    .sov {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 4, 10, .96);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      backdrop-filter: blur(12px)
+    }
+
+    .sov.show {
+      display: flex;
+      animation: fi .4s ease
+    }
+
+    @keyframes fi {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .sring {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 200, 100, .3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: sp2 .8s cubic-bezier(.4, 0, .2, 1);
+      box-shadow: 0 0 40px rgba(0, 200, 100, .3)
+    }
+
+    @keyframes sp2 {
+      0% {
+        transform: scale(.4);
+        opacity: 0
+      }
+
+      70% {
+        transform: scale(1.1)
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .scheck {
+      font-size: 44px
+    }
+
+    .stxt {
+      font-family: var(--title);
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: #00cc66;
+      text-align: center
+    }
+
+    .ssub {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .srole {
+      font-size: 12px;
+      color: rgba(0, 204, 102, .7);
+      margin-top: -8px
+    }
+
+    /* SCAN LINE */
+    .scan {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 32, 64, .7), transparent);
+      animation: scanmove .8s ease-in-out;
+      z-index: 50
+    }
+
+    @keyframes scanmove {
+      0% {
+        top: 0;
+        opacity: 1
+      }
+
+      100% {
+        top: 100vh;
+        opacity: 0
+      }
+    }
+
+    /* FOOTER */
+    .foot {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--dim);
+      text-align: center;
+      letter-spacing: .4px
+    }
+
+    /* USER BADGE (top-right after auto-login) */
+    .ubadge {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(0, 200, 100, .1);
+      border: 1px solid rgba(0, 200, 100, .3);
+      font-size: 12px;
+      color: #00cc66;
+      font-weight: 600;
+      display: none
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg"></div>
+  <div class="particles" id="pt"></div>
+
+  <!-- Radar -->
+  <div class="radar-bg">
+    <div class="rr"></div>
+    <div class="rr"></div>
+    <div class="rr"></div>
+    <div class="rr"></div>
+    <div class="rsweep"></div>
+    <div class="rdot"></div>
+    <div class="blip" style="top:28%;left:63%;animation-delay:.3s"></div>
+    <div class="blip" style="top:62%;left:38%;animation-delay:1.1s"></div>
+    <div class="blip" style="top:44%;left:76%;animation-delay:1.8s"></div>
+    <div class="blip" style="top:72%;left:54%;animation-delay:.7s"></div>
+  </div>
+
+  <!-- India silhouette -->
+  <svg class="map-bg" viewBox="0 0 400 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M200 18 L240 28 L285 14 L310 38 L340 65 L375 130 L385 200 L360 285 L310 355 L265 415 L230 468 L200 495 L170 468 L135 415 L90 355 L42 280 L18 200 L28 130 L60 65 L90 38 L200 18Z"
+      stroke="#ff2040" stroke-width="1.5" stroke-dasharray="8 6" fill="none" />
+    <circle cx="200" cy="145" r="5" fill="#ff2040" opacity=".8" />
+    <circle cx="245" cy="200" r="7" fill="#ff2040" opacity=".6" />
+    <circle cx="158" cy="225" r="4" fill="#ff6b00" opacity=".7" />
+    <circle cx="200" cy="325" r="4" fill="#ff6b00" opacity=".5" />
+    <circle cx="138" cy="285" r="3" fill="#ffd700" opacity=".6" />
+    <circle cx="265" cy="282" r="3" fill="#ffd700" opacity=".6" />
+    <circle cx="200" cy="245" r="10" fill="none" stroke="#ff2040" stroke-width="1" opacity=".35" />
+    <circle cx="200" cy="245" r="18" fill="none" stroke="#ff2040" stroke-width=".5" opacity=".18" />
+  </svg>
+
+  <div class="scan" id="scan"></div>
+
+  <!-- Success -->
+  <div class="sov" id="sov">
+    <div class="sring"><span class="scheck">✓</span></div>
+    <div class="stxt">ACCESS GRANTED</div>
+    <div class="srole" id="srole"></div>
+    <div class="ssub">Initialising CrimeZone Investigation Portal…</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="layout">
+    <!-- Logo -->
+    <div class="logo-bar">
+      <div class="logo-icon">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <circle cx="17" cy="17" r="15" stroke="#ff2040" stroke-width="2" />
+          <circle cx="17" cy="17" r="7.5" fill="#ff2040" opacity=".22" />
+          <circle cx="17" cy="17" r="3.5" fill="#ff2040" />
+          <line x1="17" y1="2" x2="17" y2="7.5" stroke="#ff2040" stroke-width="2" />
+          <line x1="17" y1="26.5" x2="17" y2="32" stroke="#ff2040" stroke-width="2" />
+          <line x1="2" y1="17" x2="7.5" y2="17" stroke="#ff2040" stroke-width="2" />
+          <line x1="26.5" y1="17" x2="32" y2="17" stroke="#ff2040" stroke-width="2" />
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">CRIME<span>ZONE</span></div>
+        <div class="logo-tag">Public Safety Platform</div>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+      <div class="ch">
+        <div class="cicon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <rect x="3" y="11" width="20" height="13" rx="2" stroke="#ff2040" stroke-width="1.8" />
+            <path d="M8 11V8a5 5 0 0 1 10 0v3" stroke="#ff2040" stroke-width="1.8" stroke-linecap="round" />
+            <circle cx="13" cy="17.5" r="2" fill="#ff2040" />
+            <line x1="13" y1="19.5" x2="13" y2="21.5" stroke="#ff2040" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="ctitle">User LOGIN</div>
+        <div class="csub">Authorised personnel only · Secure access</div>
+      </div>
+
+      <div class="form">
+        <!-- Error -->
+        <div class="emsg" id="emsg">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#ff6070" stroke-width="1.5" />
+            <line x1="8" y1="5" x2="8" y2="9" stroke="#ff6070" stroke-width="1.5" stroke-linecap="round" />
+            <circle cx="8" cy="11.5" r=".8" fill="#ff6070" />
+          </svg>
+          <span id="etxt">Invalid credentials.</span>
+        </div>
+
+        <!-- Username -->
+        <div class="field">
+          <label for="un">User ID / Username</label>
+          <div class="iw" id="uw">
+            <svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5" />
+              <path d="M2 13.5C2 11 4.686 9 8 9s6 2 6 4.5" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" />
+            </svg>
+            <input type="text" id="un" placeholder="Enter your username" autocomplete="username" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field">
+          <label for="pw">Password</label>
+          <div class="iw" id="pw">
+            <svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+              <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="8" cy="11" r="1.2" fill="currentColor" />
+            </svg>
+            <input type="password" id="pp" placeholder="Enter your password" autocomplete="current-password" />
+            <button class="pwtog" type="button" id="ptog" onclick="tpw()">
+              <svg id="eye" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M1 9C1 9 4 3 9 3s8 6 8 6-3 6-8 6S1 9 1 9z" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="fmeta">
+          <label class="rem"><input type="checkbox" id="rm"> Remember me</label>
+          <a href="#" class="fgt" onclick="forgotPw(event)">Forgot password?</a>
+        </div>
+
+
+
+        <!-- Button -->
+        <button class="lbtn" id="lb" onclick="doLogin()">
+          <div class="spin" id="sp"></div>
+          <span class="btext" id="bt">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px;margin-right:6px">
+              <path d="M6 8h7M10 5l3 3-3 3" stroke="white" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M10 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7" stroke="white" stroke-width="1.5"
+                stroke-linecap="round" />
+            </svg>
+            ACCESS SYSTEM
+          </span>
+        </button>
+
+        <div class="div">or</div>
+        <div class="rrow">New user? <a href="#" onclick="reqAccess(event)">Register</a></div>
+      </div>
+    </div>
+
+    <a class="login-home-link" href="index.html">← Back to CrimeZone home</a>
+    <div class="foot">© 2024 CrimeZone · Community safety platform</div>
+  </div>
+
+  <!-- Sign-Up Modal -->
+  <div id="suModal"
+    style="display:none;position:fixed;inset:0;z-index:200;background:rgba(4,4,10,.92);backdrop-filter:blur(14px);align-items:center;justify-content:center;">
+    <div
+      style="width:min(400px,93vw);background:rgba(10,10,22,.95);border:1px solid rgba(255,32,64,.25);border-radius:20px;padding:36px 32px 28px;box-shadow:0 0 80px rgba(255,32,64,.08),0 24px 64px rgba(0,0,0,.7);animation:ci .4s cubic-bezier(.4,0,.2,1);">
+      <div style="text-align:center;margin-bottom:24px">
+        <div
+          style="width:48px;height:48px;border-radius:50%;background:rgba(255,32,64,.1);border:1px solid rgba(255,32,64,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 0 18px rgba(255,32,64,.3)">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="7" r="4" stroke="#ff2040" stroke-width="1.7" />
+            <path d="M3 19c0-4 3.6-7 8-7s8 3 8 7" stroke="#ff2040" stroke-width="1.7" stroke-linecap="round" />
+            <line x1="17" y1="3" x2="21" y2="3" stroke="#ff2040" stroke-width="1.7" stroke-linecap="round" />
+            <line x1="19" y1="1" x2="19" y2="5" stroke="#ff2040" stroke-width="1.7" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div
+          style="font-family:var(--title);font-size:16px;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:4px">
+          NEW AGENT REGISTRATION</div>
+        <div style="font-size:11.5px;color:var(--muted)">Create your CrimeZone account</div>
+      </div>
+      <div id="suErr"
+        style="display:none;padding:9px 13px;border-radius:8px;background:rgba(255,32,64,.08);border:1px solid rgba(255,32,64,.25);font-size:12px;color:#ff6070;margin-bottom:14px">
+      </div>
+      <div class="form">
+        <div class="field">
+          <label for="suName">Full Name</label>
+          <div class="iw"><svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5" />
+              <path d="M2 13.5C2 11 4.686 9 8 9s6 2 6 4.5" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" />
+            </svg>
+            <input type="text" id="suName" placeholder="Your full name" autocomplete="name" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="suUser">Username</label>
+          <div class="iw"><svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="12" height="12" rx="3" stroke="currentColor" stroke-width="1.5" />
+              <path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <input type="text" id="suUser" placeholder="Choose a username" autocomplete="username" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="suPw">Password</label>
+          <div class="iw"><svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+              <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="8" cy="11" r="1.2" fill="currentColor" />
+            </svg>
+            <input type="password" id="suPw" placeholder="Create a password" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="suPw2">Confirm Password</label>
+          <div class="iw"><svg class="iico" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="7" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+              <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <circle cx="8" cy="11" r="1.2" fill="currentColor" />
+            </svg>
+            <input type="password" id="suPw2" placeholder="Repeat password" />
+          </div>
+        </div>
+        <button class="lbtn" id="suBtn" onclick="doSignUp()" style="margin-top:4px">
+          <div class="spin" id="suSp"></div>
+          <span class="btext">CREATE ACCOUNT</span>
+        </button>
+        <div style="text-align:center;font-size:12px;color:var(--muted)">Already have an account? <a href="#"
+            onclick="closeSignUp(event)" style="color:var(--red);font-weight:600;text-decoration:none">Sign In</a></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Built-in agent accounts (non-admin)
+    const BUILTIN_USERS = [
+      { u: 'agent', p: 'agent@2024', role: 'Field Agent' },
+      { u: 'analyst', p: 'data@2024', role: 'Data Analyst' },
+    ];
+
+    // Retrieve registered users from localStorage
+    function getRegistered() {
+      try { return JSON.parse(localStorage.getItem('cz_users') || '[]'); } catch (e) { return []; }
+    }
+    function saveRegistered(arr) {
+      localStorage.setItem('cz_users', JSON.stringify(arr));
+    }
+
+    // Particles
+    const pc = document.getElementById('pt');
+    for (let i = 0; i < 28; i++) { const d = document.createElement('div'); d.className = 'p'; const dr = 14 + Math.random() * 14; d.style.cssText = `left:${Math.random() * 100}%;width:${1 + Math.random() * 2}px;height:${1 + Math.random() * 2}px;animation-duration:${dr}s;animation-delay:${-Math.random() * dr}s;opacity:${.3 + Math.random() * .5}`; pc.appendChild(d); }
+
+    // Enter keys
+    document.getElementById('un').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('pp').focus(); });
+    document.getElementById('pp').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    // Password toggle
+    let pvis = false;
+    function tpw() { pvis = !pvis; document.getElementById('pp').type = pvis ? 'text' : 'password'; document.getElementById('eye').innerHTML = pvis ? `<path d="M2 2l14 14M7.5 6.8A4 4 0 0 1 13.2 12M1 9C1 9 4 3 9 3c1.2 0 2.3.3 3.3.8M15.5 6.5C16.6 7.6 17 9 17 9c-1 2-3.2 4.5-6 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>` : `<path d="M1 9C1 9 4 3 9 3s8 6 8 6-3 6-8 6S1 9 1 9z" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>`; }
+
+    function doLogin() {
+      const u = document.getElementById('un').value.trim();
+      const p = document.getElementById('pp').value.trim();
+      clearErr();
+      if (!u) { errField('uw'); showErr('User ID cannot be empty.'); return; }
+      if (!p) { errField('pw'); showErr('Password cannot be empty.'); return; }
+      setLoad(true);
+      setTimeout(() => {
+        // Check built-in accounts first, then registered users
+        const match =
+          BUILTIN_USERS.find(x => x.u === u && x.p === p) ||
+          getRegistered().find(x => x.u === u && x.p === p);
+        if (match) {
+          const st = document.getElementById('rm').checked ? localStorage : sessionStorage;
+          st.setItem('cz_auth', JSON.stringify({ u: match.u, role: match.role || 'Agent', ts: Date.now() }));
+          doScan();
+          setTimeout(() => showSuccess(match.role || 'Agent'), 400);
+          setTimeout(() => { window.location.href = 'crime-map.html'; }, 2400);
+        } else {
+          setLoad(false);
+          errField('uw'); errField('pw');
+          showErr('Invalid User ID or Password. Please try again.');
+        }
+      }, 420);
+    }
+
+    // ── Sign-Up ──────────────────────────────────────────────────
+    function reqAccess(e) {
+      e.preventDefault();
+      document.getElementById('suModal').style.display = 'flex';
+      document.getElementById('suName').focus();
+    }
+    function closeSignUp(e) {
+      if (e) e.preventDefault();
+      document.getElementById('suModal').style.display = 'none';
+      clearSuErr();
+    }
+    function showSuErr(m) {
+      const el = document.getElementById('suErr');
+      el.textContent = m;
+      el.style.display = 'block';
+    }
+    function clearSuErr() { document.getElementById('suErr').style.display = 'none'; }
+
+    function doSignUp() {
+      clearSuErr();
+      const name = document.getElementById('suName').value.trim();
+      const uname = document.getElementById('suUser').value.trim();
+      const pw = document.getElementById('suPw').value;
+      const pw2 = document.getElementById('suPw2').value;
+      if (!name) { showSuErr('Full name is required.'); return; }
+      if (!uname) { showSuErr('Username is required.'); return; }
+      if (uname.length < 3) { showSuErr('Username must be at least 3 characters.'); return; }
+      if (!pw) { showSuErr('Password is required.'); return; }
+      if (pw.length < 6) { showSuErr('Password must be at least 6 characters.'); return; }
+      if (pw !== pw2) { showSuErr('Passwords do not match.'); return; }
+
+      // Check for duplicate username across built-in + registered
+      const all = [...BUILTIN_USERS, ...getRegistered()];
+      if (all.find(x => x.u.toLowerCase() === uname.toLowerCase())) {
+        showSuErr('That username is already taken. Choose another.');
+        return;
+      }
+
+      // Save to localStorage registry
+      const registered = getRegistered();
+      registered.push({ u: uname, p: pw, role: 'User', name });
+      saveRegistered(registered);
+
+      // Auto-login the new user
+      sessionStorage.setItem('cz_auth', JSON.stringify({ u: uname, role: 'User', ts: Date.now() }));
+      closeSignUp();
+      doScan();
+      setTimeout(() => showSuccess('User'), 400);
+      setTimeout(() => { window.location.href = 'crime-map.html'; }, 2400);
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('suModal').addEventListener('click', function (e) {
+      if (e.target === this) closeSignUp();
+    });
+    // Enter key in signup fields
+    ['suName', 'suUser', 'suPw', 'suPw2'].forEach((id, i, arr) => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          if (i < arr.length - 1) document.getElementById(arr[i + 1]).focus();
+          else doSignUp();
+        }
+      });
+    });
+
+    function showErr(m) { document.getElementById('etxt').textContent = m; document.getElementById('emsg').classList.add('show'); }
+    function errField(id) { const el = document.getElementById(id); el.classList.add('err'); setTimeout(() => el.classList.remove('err'), 900); }
+    function clearErr() { document.getElementById('emsg').classList.remove('show');['uw', 'pw'].forEach(id => document.getElementById(id).classList.remove('err')); }
+    function setLoad(on) { const b = document.getElementById('lb'); b.disabled = on; b.classList.toggle('loading', on); }
+    function doScan() { const s = document.getElementById('scan'); s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 900); }
+    function showSuccess(role) { document.getElementById('srole').textContent = 'Welcome, ' + role; document.getElementById('sov').classList.add('show'); }
+    function forgotPw(e) { e.preventDefault(); alert('Please contact your system administrator to reset your password.'); }
+
+    // Auto-redirect if already logged in
+    (function () {
+      const s = sessionStorage.getItem('cz_auth') || localStorage.getItem('cz_auth');
+      if (s) { try { const a = JSON.parse(s); if (Date.now() - a.ts < 8 * 3600 * 1000) { doScan(); setTimeout(() => showSuccess(a.role), 200); setTimeout(() => { window.location.href = 'crime-map.html'; }, 1800); } else { sessionStorage.removeItem('cz_auth'); localStorage.removeItem('cz_auth'); } } catch (e) { } }
+    })();
+  </script>
+</body>
+
+</html>

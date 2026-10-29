@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Discover CrimeZone, a public-safety project bringing crime awareness, safer routes, emergency tools, and women-focused safety planning together." />
+  <meta name="theme-color" content="#07080d" />
+  <title>CrimeZone | Safer, More Informed Communities</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="home.css" />
+</head>
+
+<body>
+  <div class="home-grid" aria-hidden="true"></div>
+  <div class="home-glow home-glow-red" aria-hidden="true"></div>
+  <div class="home-glow home-glow-blue" aria-hidden="true"></div>
+
+  <header class="home-header">
+    <a class="home-brand" href="index.html" aria-label="CrimeZone home">
+      <span class="home-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="11.5" stroke="currentColor" stroke-width="2" />
+          <circle cx="14" cy="14" r="5.5" fill="currentColor" opacity=".25" />
+          <circle cx="14" cy="14" r="2.5" fill="currentColor" />
+          <path d="M14 1v5M14 22v5M1 14h5M22 14h5" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </span>
+      <span class="home-brand-name">CRIME<span>ZONE</span></span>
+    </a>
+
+    <nav class="home-nav" aria-label="Main navigation">
+      <a class="is-active" href="#about">Home</a>
+      <a href="crime-map.html">Safety map</a>
+      <a href="safe-route.html">Safe routes</a>
+      <a href="report-incident.html">Report</a>
+      <a href="emergency-sos.html">Nearby help</a>
+      <a href="#features">About</a>
+    </nav>
+
+    <div class="home-header-actions">
+      <a class="home-signin" href="login.html">Sign in</a>
+      <a class="home-admin-link" href="/admin/login">Admin</a>
+      <a class="home-button home-button-small" href="login.html">Sign up</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="home-hero" id="about">
+      <div class="hero-copy">
+        <div class="home-eyebrow"><span class="status-pulse"></span> WOMEN'S SAFETY &amp; EMPOWERMENT</div>
+        <h1>Your <span>Safety.</span><br />Your <span>Journey.</span><br />Our Commitment.</h1>
+        <p class="hero-lead">
+          CrimeZone brings safety information and practical tools together, helping you explore local crime
+          awareness, plan safer routes, report concerns, and stay connected with trusted people.
+        </p>
+        <div class="hero-actions">
+          <a class="home-button" href="crime-map.html">
+            Explore safety map
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.7"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+          <a class="home-button home-button-quiet" href="#android-app">Watch app demo</a>
+        </div>
+        <div class="hero-capabilities" aria-label="CrimeZone capabilities">
+          <span>Plan safer routes</span>
+          <span>Stay connected</span>
+          <span>Report incidents</span>
+          <span>Get help nearby</span>
+        </div>
+      </div>
+
+      <aside class="hero-visual" aria-label="CrimeZone safety tools preview">
+        <img class="hero-scene" src="hero-section-image.png" alt="" aria-hidden="true" />
+        <div class="visual-topline">
+          <span><i></i> CRIMEZONE / SAFETY TOOLS</span>
+          <span class="visual-live">READY</span>
+        </div>
+        <div class="visual-map" aria-hidden="true">
+          <div class="map-road road-one"></div>
+          <div class="map-road road-two"></div>
+          <div class="map-road road-three"></div>
+          <div class="map-road road-four"></div>
+          <div class="map-ring ring-one"></div>
+          <div class="map-ring ring-two"></div>
+          <div class="map-pin pin-one"><span></span></div>
+          <div class="map-pin pin-two"><span></span></div>
+          <div class="map-pin pin-three"><span></span></div>
+          <div class="map-coordinates">SAFETY STARTS WITH AWARENESS</div>
+        </div>
+        <div class="visual-bottom">
+          <div><span class="visual-bottom-icon red-icon">!</span><span><b>Stay informed</b><small>Explore area awareness</small></span></div>
+          <div><span class="visual-bottom-icon green-icon">↗</span><span><b>Plan ahead</b><small>Find a safer route</small></span></div>
+          <div><span class="visual-bottom-icon blue-icon">SOS</span><span><b>Get support</b><small>Access emergency tools</small></span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="trust-strip" aria-label="CrimeZone platform figures">
+      <div><strong>10,000+</strong><span>People reached</span></div>
+      <div><strong>500+</strong><span>Safety reports</span></div>
+      <div><strong>100+</strong><span>Help locations</span></div>
+      <div><strong>8+</strong><span>Cities covered</span></div>
+      <div><strong>Real data</strong><span>From official &amp; community sources</span></div>
+    </section>
+
+    <section class="platform-section" id="features">
+      <div class="section-heading">
+        <div>
+          <div class="home-eyebrow">KEY FEATURES</div>
+          <h2>Everything you need for a safer journey</h2>
+        </div>
+        <p>Powerful tools to plan, stay aware, get help, and support each other.</p>
+      </div>
+
+      <div class="feature-grid">
+        <a class="feature-card feature-map" href="crime-map.html">
+          <span class="feature-number">01 / AWARENESS</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          </span>
+          <strong>Crime map</strong>
+          <span class="feature-description">Explore the map dashboard and review available location-based crime information.</span>
+          <span class="feature-link">Open map <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="feature-card feature-route" href="safe-route.html">
+          <span class="feature-number">02 / JOURNEY</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 21V5a2 2 0 0 1 2-2h3m9 0v16a2 2 0 0 1-2 2h-3M8 3h8M8 21h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7" cy="6" r="1" fill="currentColor"/><circle cx="17" cy="18" r="1" fill="currentColor"/></svg>
+          </span>
+          <strong>Safe route planner</strong>
+          <span class="feature-description">Plan a journey, compare travel modes, and share your route details.</span>
+          <span class="feature-link">Plan a route <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="feature-card feature-sos" href="emergency-sos.html">
+          <span class="feature-number">03 / EMERGENCY</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 21 19H3L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v4m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <strong>Emergency SOS</strong>
+          <span class="feature-description">Access emergency calling, location sharing, and trusted contact tools.</span>
+          <span class="feature-link">Open SOS tools <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="feature-card feature-report" href="report-incident.html">
+          <span class="feature-number">04 / COMMUNITY</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s8-4 8-11V5l-8-3-8 3v5c0 7 8 11 8 11Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 8v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <strong>Report an incident</strong>
+          <span class="feature-description">Submit a local safety concern for review through the reporting flow.</span>
+          <span class="feature-link">Make a report <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="feature-card feature-connect" href="emergency-sos.html">
+          <span class="feature-number">05 / CONNECTION</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M3 19c.6-3 2.5-5 6-5s5.4 2 6 5M16 5.5a3 3 0 0 1 0 5.8M17 14c2.4.4 3.6 2 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <strong>Trusted contacts</strong>
+          <span class="feature-description">Stay connected with people you trust during a journey.</span>
+          <span class="feature-link">Open SOS tools <b aria-hidden="true">→</b></span>
+        </a>
+
+        <a class="feature-card feature-help" href="safe-route.html">
+          <span class="feature-number">06 / AWARENESS</span>
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-4.2 7-10V5l-7-2-7 2v6c0 5.8 7 10 7 10Z" stroke="currentColor" stroke-width="1.6"/><path d="M9 12.5 11 14l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <strong>Safety resources</strong>
+          <span class="feature-description">Find practical guidance before you need it.</span>
+          <span class="feature-link">Learn more <b aria-hidden="true">→</b></span>
+        </a>
+      </div>
+      <p class="data-note"><b>Data note:</b> CrimeZone’s map is for awareness and exploration. No official crime-data feed is currently configured, and community reports are not verified facts.</p>
+    </section>
+
+    <section class="android-section" id="android-app">
+      <div class="android-phone">
+        <img src="phone-icon-image.png" alt="CrimeZone SafeHer app showing emergency and safety tools" />
+      </div>
+    </section>
+
+    <section class="app-demo" id="app-demo">
+      <video controls muted loop playsinline preload="metadata" aria-label="CrimeZone Android app introduction">
+        <source src="app.mp4" type="video/mp4" />
+        Your browser does not support the app preview video.
+      </video>
+    </section>
+
+    <section class="how-section">
+      <div class="section-heading">
+        <div>
+          <div class="home-eyebrow">HOW IT WORKS</div>
+          <h2>From awareness to action</h2>
+        </div>
+        <p>A simple process to help you stay safe, informed, and connected.</p>
+      </div>
+      <div class="how-grid">
+        <article><b>01</b><h3>Explore</h3><p>Check safety information around your area.</p></article>
+        <article><b>02</b><h3>Plan</h3><p>Find safer routes and nearby help locations.</p></article>
+        <article><b>03</b><h3>Stay connected</h3><p>Share your journey with trusted contacts.</p></article>
+        <article><b>04</b><h3>Get help</h3><p>Use SOS tools and report incidents when needed.</p></article>
+      </div>
+    </section>
+
+    <section class="city-section">
+      <a class="city-art" href="crime-map.html" aria-label="Open the CrimeZone safety map">
+        <img src="map-image.png" alt="CrimeZone safety map showing crime reports, community reports, police stations, hospitals, and risk heatmap" />
+      </a>
+    </section>
+
+    <section class="home-cta">
+      <div class="cta-mark" aria-hidden="true">⌖</div>
+      <div>
+        <h2>Together for safer communities,<br />stronger women.</h2>
+        <p>Be aware. Be prepared. Be empowered.</p>
+      </div>
+      <a class="home-button" href="crime-map.html">Get started <span aria-hidden="true">→</span></a>
+    </section>
+  </main>
+
+  <footer class="home-footer">
+    <div class="footer-main">
+      <a class="home-brand footer-brand" href="index.html">
+        <span class="home-brand-name">CRIME<span>ZONE</span></span>
+      </a>
+      <span>CrimeZone · Safer life, safer cities, stronger women.</span>
+      <nav aria-label="Footer navigation">
+        <a href="index.html">Home</a>
+        <a href="crime-map.html">Safety map</a>
+        <a href="report-incident.html">Report</a>
+        <a href="login.html">Sign in</a>
+      </nav>
+    </div>
+    <div class="footer-meta">
+      <span>For awareness and preparedness only. In an emergency, contact local emergency services.</span>
+      <div class="footer-legal" aria-label="Legal information">
+        <span>Privacy</span>
+        <span>Terms</span>
+        <span>Safety disclaimer</span>
+        <span>Contact support</span>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>

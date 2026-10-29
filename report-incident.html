@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrimeZone | Report Incident</title>
+  <meta name="description" content="Report local safety concerns through the CrimeZone incident reporting module." />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="emergency-sos.css" />
+  <link rel="stylesheet" href="report-incident.css" />
+  <script>
+    (function () {
+      const s = sessionStorage.getItem('cz_auth') || localStorage.getItem('cz_auth');
+      if (!s) { window.location.replace('login.html'); return; }
+      try {
+        const a = JSON.parse(s);
+        if (Date.now() - a.ts > 8 * 3600 * 1000) {
+          sessionStorage.removeItem('cz_auth');
+          localStorage.removeItem('cz_auth');
+          window.location.replace('login.html');
+        }
+      } catch (e) { window.location.replace('login.html'); }
+    })();
+  </script>
+</head>
+
+<body class="report-page">
+  <div class="sos-bg">
+    <div class="sos-bg-grid"></div>
+    <div class="sos-bg-glow g1"></div>
+    <div class="sos-bg-glow g2"></div>
+  </div>
+
+  <header class="sos-header">
+    <div class="sos-header-left">
+      <a href="crime-map.html" class="sos-back-btn" title="Back to dashboard" aria-label="Back to dashboard">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <div class="sos-logo">
+        <div class="sos-logo-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="11" stroke="#ff2040" stroke-width="2" />
+            <circle cx="13" cy="13" r="5.5" fill="#ff2040" opacity="0.3" />
+            <circle cx="13" cy="13" r="2.5" fill="#ff2040" />
+            <line x1="13" y1="2" x2="13" y2="5" stroke="#ff2040" stroke-width="2" />
+            <line x1="13" y1="21" x2="13" y2="24" stroke="#ff2040" stroke-width="2" />
+            <line x1="2" y1="13" x2="5" y2="13" stroke="#ff2040" stroke-width="2" />
+            <line x1="21" y1="13" x2="24" y2="13" stroke="#ff2040" stroke-width="2" />
+          </svg>
+        </div>
+        <span class="sos-logo-text">CRIME<span class="sos-logo-accent">ZONE</span></span>
+      </div>
+    </div>
+    <div class="report-header-title"><span class="route-live-dot"></span> REPORT INCIDENT</div>
+    <div class="sos-header-right">
+      <a href="index.html" class="sos-nav-btn">Home</a>
+      <a href="crime-map.html" class="sos-nav-btn">Crime Map</a>
+      <a href="safe-route.html" class="sos-nav-btn">Safe Route</a>
+      <a href="emergency-sos.html" class="sos-nav-btn">Emergency SOS</a>
+    </div>
+  </header>
+
+  <main class="report-main">
+    <aside class="report-sidebar">
+      <div class="report-side-brand">
+        <div class="report-side-icon">×</div>
+        <div>
+          <div class="report-side-name">CrimeZone</div>
+          <div class="report-side-sub">Your report. Our solution.</div>
+        </div>
+      </div>
+
+      <nav class="report-side-nav" aria-label="Report steps">
+        <button class="report-step active" type="button">
+          <span class="report-step-icon">◉</span>
+          <span>Report a Problem</span>
+        </button>
+        <button class="report-step" type="button">
+          <span class="report-step-icon">◌</span>
+          <span>Photo</span>
+        </button>
+        <button class="report-step" type="button">
+          <span class="report-step-icon">◌</span>
+          <span>Classic</span>
+        </button>
+        <button class="report-step" type="button">
+          <span class="report-step-icon">◌</span>
+          <span>Describe and locate</span>
+        </button>
+        <button class="report-step" type="button">
+          <span class="report-step-icon">◌</span>
+          <span>Follow</span>
+        </button>
+        <button class="report-step" type="button">
+          <span class="report-step-icon">◌</span>
+          <span>Explore</span>
+        </button>
+      </nav>
+
+      <div class="report-side-footer">
+        <button type="button" class="report-mini-btn">About</button>
+        <button type="button" class="report-mini-btn">Contact</button>
+        <button type="button" class="report-mini-btn">Imprint</button>
+      </div>
+    </aside>
+
+    <section class="report-map-wrap" aria-label="Map and form panel">
+      <div class="report-map" id="reportMap"></div>
+      <div class="report-map-overlay">
+        <div class="report-map-pill">Photo Report</div>
+      </div>
+
+      <div class="report-card" id="reportCard">
+        <div class="report-card-header">
+          <h1>Photo Report</h1>
+          <button type="button" class="report-close" aria-label="Close">×</button>
+        </div>
+
+        <form id="incidentForm" class="report-form">
+          <div class="report-upload-box" id="uploadBox">
+            <label class="report-upload-label" for="incidentPhoto">
+              <div class="report-upload-visual">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 4v10m0 0 4-4m-4 4-4-4M5 17.5A2.5 2.5 0 0 0 7.5 20h9A2.5 2.5 0 0 0 19 17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span>Upload a photo</span>
+            </label>
+            <input id="incidentPhoto" type="file" accept="image/jpeg,image/png,image/webp" />
+            <div class="report-preview" id="photoPreview" hidden>
+              <img id="previewImage" alt="Uploaded report preview" />
+            </div>
+          </div>
+
+          <div class="report-grid-two">
+            <div class="report-field">
+              <label for="incidentCategory">Incident category</label>
+              <select id="incidentCategory" name="incidentCategory" required>
+                <option>Streetlight outage</option>
+                <option>Harassment</option>
+                <option>Unsafe area</option>
+                <option>Traffic issue</option>
+                <option>Public safety</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="report-field">
+              <label for="incidentSeverity">Severity</label>
+              <select id="incidentSeverity" name="incidentSeverity" required>
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+                <option>Critical</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="report-grid-two">
+            <div class="report-field">
+              <label for="incidentDate">Date</label>
+              <input id="incidentDate" type="date" required />
+            </div>
+            <div class="report-field">
+              <label for="incidentTime">Time</label>
+              <input id="incidentTime" type="time" required />
+            </div>
+          </div>
+
+          <div class="report-field">
+            <label for="incidentLocation">Location</label>
+            <input id="incidentLocation" type="text" placeholder="Add area, landmark, or street" maxlength="300" required />
+          </div>
+
+          <div class="report-field">
+            <label for="incidentDescription">Description</label>
+            <textarea id="incidentDescription" rows="4" maxlength="3000" placeholder="Describe what happened and any immediate safety concern."></textarea>
+          </div>
+
+          <div class="report-field toggle-field">
+            <div>
+              <label>Privacy</label>
+              <small>Hide my exact address from public listings.</small>
+            </div>
+            <label class="switch" aria-label="Toggle privacy mode">
+              <input type="checkbox" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="report-status-panel">
+            <div class="report-status-header">
+              <span>Review workflow</span>
+              <span class="status-pill pending">Pending</span>
+            </div>
+            <div class="report-status-steps">
+              <span class="status-step current">Pending</span>
+              <span class="status-step">Under review</span>
+              <span class="status-step">Action recorded</span>
+            </div>
+          </div>
+
+          <p class="report-form-message" id="reportFormMessage" role="status" aria-live="polite" hidden></p>
+          <div class="report-actions">
+            <button type="submit" class="report-submit" id="reportSubmitButton">Submit Report</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div class="report-success hidden" id="successModal" aria-live="polite">
+    <div class="report-success-box">
+      <div class="report-success-icon">✓</div>
+      <h2>Report submitted</h2>
+      <p>Your report has been received and is now pending review.</p>
+      <div class="report-ref-row">
+        <span>Reference</span>
+        <strong id="reportReference">CZ-892143</strong>
+      </div>
+      <div class="report-success-meta">
+        <span>Moderation status: <strong>Pending review</strong></span>
+        <button type="button" class="report-flag-btn" id="flagReportBtn">Flag incorrect report</button>
+      </div>
+      <button type="button" class="report-success-done" id="closeSuccessButton">Done</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="report-incident.js"></script>
+</body>
+
+</html>

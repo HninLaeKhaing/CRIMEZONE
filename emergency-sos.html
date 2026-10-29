@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrimeZone | Emergency SOS</title>
+  <meta name="description"
+    content="Emergency SOS — Instant safety alerts, location sharing, and trusted contact notification." />
+
+  <!-- Leaflet for map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="emergency-sos.css" />
+
+  <!-- Auth guard -->
+  <script>
+    (function () {
+      const s = sessionStorage.getItem('cz_auth') || localStorage.getItem('cz_auth');
+      if (!s) { window.location.replace('login.html'); return; }
+      try {
+        const a = JSON.parse(s);
+        if (Date.now() - a.ts > 8 * 3600 * 1000) {
+          sessionStorage.removeItem('cz_auth'); localStorage.removeItem('cz_auth');
+          window.location.replace('login.html');
+        }
+      } catch (e) { window.location.replace('login.html'); }
+    })();
+  </script>
+</head>
+
+<body>
+
+  <!-- Background -->
+  <div class="sos-bg">
+    <div class="sos-bg-grid"></div>
+    <div class="sos-bg-glow g1"></div>
+    <div class="sos-bg-glow g2"></div>
+  </div>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="sos-header">
+    <div class="sos-header-left">
+      <a href="crime-map.html" class="sos-back-btn" title="Back to dashboard">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <div class="sos-logo">
+        <div class="sos-logo-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="11" stroke="#ff2040" stroke-width="2" />
+            <circle cx="13" cy="13" r="5.5" fill="#ff2040" opacity="0.3" />
+            <circle cx="13" cy="13" r="2.5" fill="#ff2040" />
+            <line x1="13" y1="2" x2="13" y2="5" stroke="#ff2040" stroke-width="2" />
+            <line x1="13" y1="21" x2="13" y2="24" stroke="#ff2040" stroke-width="2" />
+            <line x1="2" y1="13" x2="5" y2="13" stroke="#ff2040" stroke-width="2" />
+            <line x1="21" y1="13" x2="24" y2="13" stroke="#ff2040" stroke-width="2" />
+          </svg>
+        </div>
+        <span class="sos-logo-text">CRIME<span class="sos-logo-accent">ZONE</span></span>
+      </div>
+    </div>
+    <div class="sos-header-center">
+      <div class="sos-header-badge"><span class="sos-pulse-dot"></span> EMERGENCY SOS</div>
+    </div>
+    <div class="sos-header-right">
+      <a href="index.html" class="sos-nav-btn">Home</a>
+      <a href="crime-map.html" class="sos-nav-btn">Crime Map</a>
+      <div class="sos-time" id="sosTime"></div>
+      <a href="safe-route.html" class="sos-nav-btn">Safe Route</a>
+      <a href="report-incident.html" class="sos-nav-btn">Report Incident</a>
+    </div>
+  </header>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <main class="sos-grid">
+
+    <!-- ╔══ ROW 1 LEFT: System Status ══╗ -->
+    <div class="g-card g-status" id="sosBanner">
+      <div class="g-status-top">
+        <span class="g-badge green" id="sosIndicator"><span class="g-dot green"></span> ACTIVE</span>
+      </div>
+      <h2 class="g-status-title" id="sosStatusLabel">All Systems Protected</h2>
+      <p class="g-status-desc" id="sosStatusSub">Your device integrity, network security, and physical location monitoring are active and functioning normally.</p>
+      <div class="g-status-chips">
+        <div class="g-chip" onclick="callPolice()">
+          <div class="g-chip-icon blue">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 2L3 7V11C3 15.97 6.42 20.63 11 22C15.58 20.63 19 15.97 19 11V7L11 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
+          </div>
+          <div class="g-chip-label">Police</div>
+          <div class="g-chip-sub">Secure</div>
+        </div>
+        <div class="g-chip" onclick="callAmbulance()">
+          <div class="g-chip-icon green">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><rect x="4" y="8" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M11 10V16M8 13H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="g-chip-label">Medical</div>
+          <div class="g-chip-sub">Healthy</div>
+        </div>
+        <div class="g-chip" onclick="callWomenHelpline()">
+          <div class="g-chip-icon purple">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="4.5" stroke="currentColor" stroke-width="1.6"/><path d="M11 12.5V18M8.5 16H13.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="g-chip-label">Women</div>
+          <div class="g-chip-sub">Optimized</div>
+        </div>
+        <div class="g-chip" onclick="callFireService()">
+          <div class="g-chip-icon orange">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M11 2.5C11.8 6.1 8 7.2 8 10.1C8 11.5 9.1 12.5 10.3 12.5C12.2 12.5 13.2 10.9 12.7 8.8C15.2 10.3 16.5 12.1 16.5 14.2C16.5 17.2 14.1 19.5 11 19.5C7.9 19.5 5.5 17.2 5.5 14.2C5.5 11.4 7.6 9.8 8.1 7.5C8.5 5.8 9.5 4 11 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="g-chip-label">Fire</div>
+          <div class="g-chip-sub">101</div>
+        </div>
+        <div class="g-chip" onclick="callChildHelpline()">
+          <div class="g-chip-icon blue">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="7" r="3.5" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 19C4.5 15.4 7.4 12.5 11 12.5C14.6 12.5 17.5 15.4 17.5 19M16 3.5V7M14.25 5.25H17.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <div class="g-chip-label">Child Helpline</div>
+          <div class="g-chip-sub">1098</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ╔══ ROW 1 RIGHT: SOS Panic ══╗ -->
+    <div class="g-card g-panic">
+      <div class="g-panic-top">
+        <span class="g-badge red"><span class="g-dot red"></span> EMERGENCY</span>
+        <span class="g-panic-mode">Panic Mode</span>
+      </div>
+      <p class="g-panic-desc">Instantly share location, record audio, and alert contacts.</p>
+
+      <div class="g-sos-wrap">
+        <div class="sos-btn-ring r1" id="sosRing1"></div>
+        <div class="sos-btn-ring r2" id="sosRing2"></div>
+        <button class="g-sos-btn" id="sosBtn"
+          onmousedown="startSOSHold(event)" onmouseup="cancelSOSHold(event)"
+          onmouseleave="cancelSOSHold(event)"
+          ontouchstart="startSOSHold(event)" ontouchend="cancelSOSHold(event)">
+          <span class="g-sos-text" id="sosBtnText">SOS</span>
+          <svg class="g-sos-progress" viewBox="0 0 200 200" id="sosBtnProgress">
+            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4" />
+            <circle cx="100" cy="100" r="90" fill="none" stroke="#fff" stroke-width="5"
+              stroke-dasharray="565.48" stroke-dashoffset="565.48" stroke-linecap="round" id="sosProgressCircle" />
+          </svg>
+        </button>
+      </div>
+
+      <button class="g-call-btn" onclick="callEmergency()">
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><path d="M20 15.5C18.75 15.5 17.55 15.3 16.43 14.93C16.08 14.82 15.69 14.9 15.41 15.17L13.21 17.37C10.38 15.93 8.06 13.62 6.62 10.78L8.82 8.57C9.1 8.31 9.18 7.92 9.07 7.57C8.7 6.45 8.5 5.25 8.5 4C8.5 3.45 8.05 3 7.5 3H4C3.45 3 3 3.45 3 4C3 12.28 9.72 19 18 19C18.55 19 19 18.55 19 18V15.5C19 14.95 18.55 14.5 18 14.5H20Z" fill="currentColor"/></svg>
+        Emergency Dial · 112
+      </button>
+    </div>
+
+    <!-- ╔══ ROW 2 LEFT: Live Location ══╗ -->
+    <div class="g-card g-location">
+      <div class="g-card-head">
+        <div class="g-card-dot green"></div>
+        <span class="g-card-label">Live Location</span>
+        <span class="g-loc-share tracking-off" id="sosLiveStatus" aria-live="polite">Live tracking off</span>
+        <button class="g-head-btn" onclick="captureLocation()" title="Refresh">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M12 7A5 5 0 1 1 7 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 2V7H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <!-- Map -->
+      <div class="g-map-area">
+        <div id="sosMap" class="g-map"></div>
+        <div class="g-map-loading" id="sosMapLoading">
+          <div class="g-radar"><div class="g-radar-r r1"></div><div class="g-radar-r r2"></div><div class="g-radar-d"></div></div>
+          <span>Acquiring location...</span>
+        </div>
+        <div class="g-map-denied" id="sosMapDenied" style="display:none">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#ff6b00" stroke-width="1.8"/><path d="M8 8L16 16M16 8L8 16" stroke="#ff6b00" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>Location access denied</span>
+          <span class="g-denied-sub">Enable in browser settings</span>
+        </div>
+      </div>
+      <div class="g-loc-footer">
+        <div class="g-loc-addr">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1C5.24 1 3 3.24 3 6C3 9.75 8 15 8 15C8 15 13 9.75 13 6C13 3.24 10.76 1 8 1ZM8 7.5C7.17 7.5 6.5 6.83 6.5 6C6.5 5.17 7.17 4.5 8 4.5C8.83 4.5 9.5 5.17 9.5 6C9.5 6.83 8.83 7.5 8 7.5Z" fill="#00ff88"/></svg>
+          <span id="sosAddressText">Detecting your location...</span>
+        </div>
+        <div class="g-loc-time">
+          <svg width="10" height="10" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#666" stroke-width="1.3"/><path d="M7 4V7.5L9.5 9" stroke="#666" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span id="sosLocTimeText">—</span>
+        </div>
+        <div class="g-share-row">
+          <button class="g-share live" id="sosLiveToggle" onclick="toggleLiveTracking()" aria-pressed="false">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+            Start Live Tracking
+          </button>
+          <button class="g-share whatsapp" onclick="shareViaWhatsApp()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </button>
+          <button class="g-share sms" onclick="shareViaSMS()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M7 10h4M7 13h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            SMS
+          </button>
+          <button class="g-share copy" onclick="copyLocationLink()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2h3" stroke="currentColor" stroke-width="1.8"/></svg>
+            Copy
+          </button>
+        </div>
+        <p class="g-loc-share-note">Live tracking updates this map while this page is open. Messages share your latest location snapshot.</p>
+      </div>
+    </div>
+
+    <!-- ╔══ ROW 2 RIGHT: Emergency Contacts ══╗ -->
+    <div class="g-card g-contacts">
+      <div class="g-card-head">
+        <div class="g-card-dot orange"></div>
+        <span class="g-card-label">Emergency Contacts</span>
+        <span class="g-contact-count"><strong id="sosShareCount">0</strong> saved</span>
+        <button class="g-head-btn add" onclick="openAddContact()" title="Add Contact">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 3V11M3 7H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="g-contacts-body" id="sosContactsList">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- ╔══ ROW 3 FULL: Alert Status ══╗ -->
+    <div class="g-card g-alerts">
+      <div class="g-card-head">
+        <div class="g-card-dot yellow"></div>
+        <span class="g-card-label">Alert Status</span>
+        <button class="g-head-btn" onclick="clearAlerts()" title="Clear">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="g-alerts-body" id="sosAlertsList">
+        <div class="g-alert-empty" id="sosAlertEmpty">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" stroke-dasharray="4 4"/><path d="M10 14L13 17L18 11" stroke="rgba(255,255,255,0.12)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>No alerts sent yet</span>
+          <span class="g-alert-empty-sub">Alerts appear here when SOS is triggered</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ ADD CONTACT MODAL ═══ -->
+  <div class="g-modal-bg" id="contactModal" onclick="if(event.target===this)closeAddContact()">
+    <div class="g-modal">
+      <div class="g-modal-head">
+        <span>Add Trusted Contact</span>
+        <button class="g-modal-x" onclick="closeAddContact()">✕</button>
+      </div>
+      <div class="g-modal-body">
+        <div class="g-field">
+          <label for="contactName">Full Name</label>
+          <input type="text" id="contactName" placeholder="e.g. Priya Sharma" autocomplete="off" />
+        </div>
+        <div class="g-field">
+          <label for="contactPhone">Phone Number</label>
+          <input type="tel" id="contactPhone" placeholder="e.g. +91 98765 43210" autocomplete="off" />
+        </div>
+        <div class="g-field">
+          <label for="contactRelation">Relationship</label>
+          <select id="contactRelation">
+            <option value="Family">Family</option>
+            <option value="Friend">Friend</option>
+            <option value="Partner">Partner</option>
+            <option value="Colleague">Colleague</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button class="g-modal-save" onclick="saveContact()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8L7 11L12 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Save Contact
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SOS ACTIVE OVERLAY ═══ -->
+  <div class="sos-active-overlay" id="sosActiveOverlay" style="display:none">
+    <div class="sos-active-content">
+      <div class="sos-active-rings">
+        <div class="sos-active-ring ar1"></div>
+        <div class="sos-active-ring ar2"></div>
+        <div class="sos-active-ring ar3"></div>
+      </div>
+      <div class="sos-active-icon">
+        <svg width="56" height="56" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="25" stroke="white" stroke-width="2" stroke-dasharray="6 4" class="sos-active-circle"/>
+          <circle cx="30" cy="22" r="3.5" fill="white"/>
+          <rect x="27.5" y="27" width="5" height="14" rx="2.5" fill="white"/>
+          <circle cx="30" cy="46" r="3" fill="white"/>
+        </svg>
+      </div>
+      <h2 class="sos-active-title" id="sosActiveTitle">SOS ACTIVATED</h2>
+      <p class="sos-active-sub" id="sosActiveSub">Sending emergency alerts...</p>
+      <div class="sos-active-progress"><div class="sos-active-bar" id="sosActiveBar"></div></div>
+      <div class="sos-active-status" id="sosActiveStatus"></div>
+      <button class="sos-cancel-btn" onclick="cancelSOS()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4L12 12M12 4L4 12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        Cancel SOS
+      </button>
+    </div>
+  </div>
+
+  <script src="emergency-sos.js"></script>
+</body>
+
+</html>

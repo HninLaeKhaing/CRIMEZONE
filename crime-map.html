@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrimeZone | Crime Map Dashboard</title>
+  <meta name="description"
+    content="Visualize crime hotspots including rape cases and murders on an interactive dark map. Enter your state and city to explore safety data." />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Heatmap Plugin -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Auth guard: redirect to login if not authenticated -->
+  <script>
+    (function () {
+      const s = sessionStorage.getItem('cz_auth') || localStorage.getItem('cz_auth');
+      if (!s) { window.location.replace('login.html'); return; }
+      try {
+        const a = JSON.parse(s);
+        if (Date.now() - a.ts > 8 * 3600 * 1000) {
+          sessionStorage.removeItem('cz_auth'); localStorage.removeItem('cz_auth');
+          window.location.replace('login.html');
+        }
+      } catch (e) { window.location.replace('login.html'); }
+    })();
+  </script>
+</head>
+
+<body>
+
+  <!-- Background Particles -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- ═══ GEOLOCATION PERMISSION PROMPT ═══ -->
+  <div class="geo-prompt" id="geoPrompt" style="display:none">
+    <div class="geo-card">
+      <div class="geo-radar">
+        <div class="geo-radar-ring r1"></div>
+        <div class="geo-radar-ring r2"></div>
+        <div class="geo-radar-ring r3"></div>
+        <div class="geo-radar-sweep"></div>
+        <div class="geo-radar-dot"></div>
+      </div>
+      <div class="geo-title">Allow Location Access</div>
+      <div class="geo-subtitle">CrimeZone will automatically detect your state &amp; city to instantly show crime data,
+        criminal profiles, and safety alerts for your neighbourhood.</div>
+      <div class="geo-features">
+        <div class="geo-feat"><span class="geo-feat-icon">📍</span> Auto-detects your exact location</div>
+        <div class="geo-feat"><span class="geo-feat-icon">🔴</span> Shows crime hotspots near you</div>
+        <div class="geo-feat"><span class="geo-feat-icon">⚠️</span> Alerts you about your area's risk level</div>
+        <div class="geo-feat"><span class="geo-feat-icon">🔍</span> Loads criminal profiles for your state</div>
+      </div>
+      <button class="geo-allow-btn" onclick="requestUserLocation()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="7" stroke="white" stroke-width="1.8" />
+          <circle cx="9" cy="9" r="3" fill="white" />
+          <line x1="9" y1="2" x2="9" y2="0" stroke="white" stroke-width="1.8" />
+          <line x1="9" y1="18" x2="9" y2="16" stroke="white" stroke-width="1.8" />
+          <line x1="0" y1="9" x2="2" y2="9" stroke="white" stroke-width="1.8" />
+          <line x1="16" y1="9" x2="18" y2="9" stroke="white" stroke-width="1.8" />
+        </svg>
+        Allow Location &amp; Show My Area
+      </button>
+      <button class="geo-skip-btn" onclick="skipGeoLocation()">Skip — Show All India Map</button>
+      <div class="geo-note">🔒 Location is used only for map display. Not stored or shared.</div>
+    </div>
+  </div>
+
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="12" stroke="#ff2040" stroke-width="2" />
+          <circle cx="14" cy="14" r="6" fill="#ff2040" opacity="0.3" />
+          <circle cx="14" cy="14" r="3" fill="#ff2040" />
+          <line x1="14" y1="2" x2="14" y2="6" stroke="#ff2040" stroke-width="2" />
+          <line x1="14" y1="22" x2="14" y2="26" stroke="#ff2040" stroke-width="2" />
+          <line x1="2" y1="14" x2="6" y2="14" stroke="#ff2040" stroke-width="2" />
+          <line x1="22" y1="14" x2="26" y2="14" stroke="#ff2040" stroke-width="2" />
+        </svg>
+      </div>
+      <span class="logo-text">CRIME<span class="logo-accent">ZONE</span></span>
+    </div>
+    <div class="header-right">
+      <div class="header-badge">
+        <span class="pulse-dot"></span>
+        LIVE DATA
+      </div>
+      <div class="agent-badge" id="agentBadge"></div>
+      <a class="safe-route-link" href="safe-route.html" title="Open Safe Route Planner">
+        <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
+          <path d="M3 15V4.5a1.5 1.5 0 0 1 1.5-1.5H7m8 0v10.5a1.5 1.5 0 0 1-1.5 1.5H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="4.5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="13.5" cy="13.5" r="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 3h4M7 15h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Safe Route
+      </a>
+      <a class="safe-route-link" href="report-incident.html" title="Open Report Incident page">
+        <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
+          <path d="M9 2.5v6m0 0 3.5-3.5M9 8.5 5.5 5M3 12.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 15.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Report Incident
+      </a>
+      <a class="safe-route-link" href="emergency-sos.html" title="Open Emergency SOS">
+        Emergency SOS
+      </a>
+      <a class="safe-route-link" href="index.html" title="Return to CrimeZone home">
+        Home
+      </a>
+      <button class="logout-btn" onclick="doLogout()" title="Logout">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+          <path d="M6 8h7M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M10 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h7" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout" aria-label="Crime map dashboard">
+
+    <!-- Control Panel -->
+    <aside class="control-panel" id="controlPanel">
+      <div class="panel-inner">
+
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1L11.09 6.26L17 7L13 10.74L14.18 16L9 13.27L3.82 16L5 10.74L1 7L6.91 6.26L9 1Z"
+              fill="#ff2040" />
+          </svg>
+          Crime Zone Finder
+        </div>
+
+
+        <!-- Search Form -->
+        <div class="search-form">
+          <div class="input-group">
+            <label for="stateInput">State / Province</label>
+            <div class="input-wrap">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 1C5.24 1 3 3.24 3 6C3 9.75 8 15 8 15C8 15 13 9.75 13 6C13 3.24 10.76 1 8 1ZM8 7.5C7.17 7.5 6.5 6.83 6.5 6C6.5 5.17 7.17 4.5 8 4.5C8.83 4.5 9.5 5.17 9.5 6C9.5 6.83 8.83 7.5 8 7.5Z"
+                  fill="#ff2040" />
+              </svg>
+              <input type="text" id="stateInput" placeholder="e.g. Maharashtra, Delhi..." autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="cityInput">City / District</label>
+            <div class="input-wrap">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="7" width="14" height="8" rx="1" stroke="#ff2040" stroke-width="1.5" />
+                <path d="M4 7V5C4 3.34 5.34 2 7 2H9C10.66 2 12 3.34 12 5V7" stroke="#ff2040" stroke-width="1.5" />
+                <rect x="6" y="10" width="4" height="5" rx="0.5" fill="#ff2040" opacity="0.4" />
+              </svg>
+              <input type="text" id="cityInput" placeholder="e.g. Mumbai, Nagpur..." autocomplete="off" />
+            </div>
+          </div>
+
+          <button class="search-btn" id="searchBtn" onclick="searchLocation()">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="7.5" cy="7.5" r="5.5" stroke="white" stroke-width="2" />
+              <path d="M12 12L16 16" stroke="white" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            Analyze Crime Zones
+          </button>
+          <button class="all-india-btn" id="allIndiaBtn" onclick="loadAllIndiaData()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="#ff6040" stroke-width="1.5" />
+              <path d="M8 2L9.5 6H14L10.5 8.5L12 12L8 10L4 12L5.5 8.5L2 6H6.5L8 2Z" fill="#ff6040" opacity="0.7" />
+            </svg>
+            Show All India Map
+          </button>
+        </div>
+
+        <!-- Crime Filter -->
+        <div class="filter-section">
+          <div class="filter-title">Crime Filters</div>
+          <div class="filter-chips">
+            <label class="chip active" id="chip-all" style="--chip-color:#ff2040;">
+              <input type="checkbox" id="filter-all" checked onchange="toggleFilter('all')">
+              <span>All Crimes</span>
+            </label>
+            <label class="chip" id="chip-murder" style="--chip-color: #ff6b00;">
+              <input type="checkbox" id="filter-murder" onchange="toggleFilter('murder')">
+              <span> Murder</span>
+            </label>
+            <label class="chip" id="chip-rape" style="--chip-color: #ff0040;">
+              <input type="checkbox" id="filter-rape" onchange="toggleFilter('rape')">
+              <span> Rape</span>
+            </label>
+            <label class="chip" id="chip-assault" style="--chip-color: #ffd700;">
+              <input type="checkbox" id="filter-assault" onchange="toggleFilter('assault')">
+              <span> Assault</span>
+            </label>
+            <label class="chip" id="chip-kidnap" style="--chip-color: #cc44ff;">
+              <input type="checkbox" id="filter-kidnap" onchange="toggleFilter('kidnap')">
+              <span> Kidnapping</span>
+            </label>
+            <label class="chip" id="chip-dowry" style="--chip-color: #ff44aa;">
+              <input type="checkbox" id="filter-dowry" onchange="toggleFilter('dowry')">
+              <span> Dowry Deaths</span>
+            </label>
+            <label class="chip" id="chip-traffic" style="--chip-color: #44aaff;">
+              <input type="checkbox" id="filter-traffic" onchange="toggleFilter('traffic')">
+              <span> Human Trafficking</span>
+            </label>
+            <label class="chip" id="chip-cruelty" style="--chip-color: #ff8800;">
+              <input type="checkbox" id="filter-cruelty" onchange="toggleFilter('cruelty')">
+              <span> Cruelty</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-section" id="statsSection" style="display:none;">
+          <div class="stats-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="5" width="2.5" height="8" fill="#ff2040" />
+              <rect x="5.5" y="2" width="2.5" height="11" fill="#ff2040" opacity="0.7" />
+              <rect x="10" y="0" width="2.5" height="13" fill="#ff2040" opacity="0.5" />
+            </svg>
+            Crime Statistics
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="statTotal">—</div>
+              <div class="stat-label">Total Zones</div>
+            </div>
+            <div class="stat-card danger">
+              <div class="stat-value" id="statRape">—</div>
+              <div class="stat-label">Rape Cases</div>
+            </div>
+            <div class="stat-card warning">
+              <div class="stat-value" id="statMurder">—</div>
+              <div class="stat-label">Murders</div>
+            </div>
+            <div class="stat-card caution">
+              <div class="stat-value" id="statAssault">—</div>
+              <div class="stat-label">Assaults</div>
+            </div>
+          </div>
+          <div class="hotspot-card">
+            <span class="hotspot-lbl">🔥 Top Hotspot</span>
+            <span class="hotspot-name" id="hotspotName">—</span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+          <div class="legend-title">Map Legend</div>
+          <div class="legend-item"><span class="legend-dot"
+              style="background:#cc0030;box-shadow:0 0 8px #cc0030"></span> Extreme Danger Zone (intensity &gt; 65%)
+          </div>
+          <div class="legend-item"><span class="legend-dot"
+              style="background:#e85500;box-shadow:0 0 8px #e85500"></span> High Crime Area (intensity 35–65%)</div>
+          <div class="legend-item"><span class="legend-dot"
+              style="background:#c49000;box-shadow:0 0 8px #c49000"></span> Moderate Risk Zone (intensity 12–35%)</div>
+          <div class="legend-item"><span class="legend-dot"
+              style="background:#00aa66;box-shadow:0 0 8px #00aa66"></span> Relatively Safe (intensity &lt; 12%)</div>
+        </div>
+
+        <!-- Crime Activity Level + Lower Crime States (below legend) -->
+        <div class="safety-index-panel" id="safetyIndexPanel" style="display:none">
+          <div class="si-header">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="2" y="7" width="2" height="5" rx="1" fill="#7eb8f7"/>
+              <rect x="6" y="4" width="2" height="8" rx="1" fill="#7eb8f7"/>
+              <rect x="10" y="1" width="2" height="11" rx="1" fill="#7eb8f7"/>
+            </svg>
+            Safety Index
+          </div>
+          <div class="si-bar-wrap">
+            <div class="si-bar-label">
+              <span id="siLabel">Activity Level</span>
+              <span class="si-score" id="siScore">—</span>
+            </div>
+            <div class="si-bar">
+              <div class="si-fill" id="siFill"></div>
+            </div>
+            <div class="si-sub" id="siSub">—</div>
+          </div>
+
+          <div class="safe-places-header">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <circle cx="6.5" cy="6.5" r="5.5" stroke="#7eb8f7" stroke-width="1.4" />
+              <path d="M3.5 6.5h6M6.5 3.5v6" stroke="#7eb8f7" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            Lower Crime Rate States
+          </div>
+          <div class="safe-place-note">Source: National Crime Records Bureau data — figures reflect reported cases only.</div>
+          <div class="safe-places-list" id="safeStatesList">
+            <div class="safe-place-empty">Load map data to compare states</div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Map Container -->
+    <section class="map-section">
+      <div id="map"></div>
+
+      <!-- Map Overlay Message -->
+      <div class="map-overlay" id="mapOverlay">
+        <div class="overlay-content">
+          <div class="overlay-icon">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+              <circle cx="30" cy="30" r="28" stroke="#ff2040" stroke-width="2" stroke-dasharray="6 4" opacity="0.6" />
+              <circle cx="30" cy="30" r="18" stroke="#ff2040" stroke-width="1.5" opacity="0.4" />
+              <circle cx="30" cy="30" r="8" fill="#ff2040" opacity="0.2" />
+              <circle cx="30" cy="30" r="4" fill="#ff2040" />
+            </svg>
+          </div>
+          <h2 class="overlay-title">Enter Location to Begin</h2>
+          <p class="overlay-text">Type your state and city in the panel to load the crime heat map for that area.</p>
+        </div>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+        <div class="loader-content">
+          <div class="loader-ring"></div>
+          <p class="loader-text">Scanning crime data<span class="dots"></span></p>
+        </div>
+      </div>
+
+      <!-- Map Info Bar -->
+      <div class="map-info-bar" id="mapInfoBar" style="display:none;">
+        <div class="map-location-tag">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M7 1C4.79 1 3 2.79 3 5C3 7.84 7 13 7 13C7 13 11 7.84 11 5C11 2.79 9.21 1 7 1ZM7 6.5C6.17 6.5 5.5 5.83 5.5 5C5.5 4.17 6.17 3.5 7 3.5C7.83 3.5 8.5 4.17 8.5 5C8.5 5.83 7.83 6.5 7 6.5Z"
+              fill="#ff2040" />
+          </svg>
+          <span id="locationTag">—</span>
+        </div>
+        <div class="map-timestamp">
+          <span id="dataTimestamp">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CRIMINAL PROFILES PANEL (slides in from right) ═══ -->
+    <div class="criminal-panel" id="criminalPanel">
+      <div class="cp-header">
+        <div class="cp-header-left">
+          <div class="cp-header-icon"></div>
+          <div>
+            <div class="cp-title" id="cpTitle">STATE</div>
+            <div class="cp-subtitle" id="cpSubtitle">Criminal Records</div>
+          </div>
+        </div>
+        <button class="cp-close-btn" onclick="closeCriminalPanel()">✕</button>
+      </div>
+
+      <!-- Quick stats bar -->
+      <div class="cp-stats" id="cpStats" style="display:none">
+        <div class="cp-stat-item"><span class="cp-stat-val" id="cpCount">—</span><span
+            class="cp-stat-lbl">Profiles</span></div>
+        <div class="cp-stat-item danger"><span class="cp-stat-val" id="cpMurder">—</span><span
+            class="cp-stat-lbl">Murders</span></div>
+        <div class="cp-stat-item warn"><span class="cp-stat-val" id="cpRape">—</span><span
+            class="cp-stat-lbl">Rape</span></div>
+        <div class="cp-stat-item caution"><span class="cp-stat-val" id="cpAssault">—</span><span
+            class="cp-stat-lbl">Assault</span></div>
+
+      </div>
+
+      <div class="cp-notice">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="#ff6b00" stroke-width="1.5" />
+          <line x1="7" y1="4" x2="7" y2="8" stroke="#ff6b00" stroke-width="1.5" stroke-linecap="round" />
+          <circle cx="7" cy="10" r="0.8" fill="#ff6b00" />
+        </svg>
+        Profiles based on publicly reported notorious cases. For informational purposes only.
+      </div>
+
+      <!-- Criminal cards grid -->
+      <div class="cp-grid" id="cpGrid"></div>
+
+      <div class="cp-footer-note">Source: NCRB Reports, Publicly Reported Cases, Court Records</div>
+    </div>
+
+    <!-- ═══ CRIMINAL DETAIL MODAL (full-screen) ═══ -->
+    <div class="criminal-modal" id="criminalModal" style="display:none"
+      onclick="if(event.target===this)closeCriminalModal()">
+      <div class="cm-panel">
+
+        <!-- Scan animation overlay -->
+        <div class="cm-scan-line" id="cmScan"></div>
+
+        <!-- WANTED banner -->
+        <div class="cm-wanted-banner" id="cmWanted" style="display:none">
+          ⚠ WANTED ⚠ WANTED ⚠ WANTED ⚠ WANTED ⚠ WANTED ⚠
+        </div>
+
+        <button class="cm-close" onclick="closeCriminalModal()">✕ CLOSE</button>
+
+        <div class="cm-body">
+          <!-- Left: photo -->
+          <div class="cm-photo-col">
+            <div class="cm-photo" id="cmPhoto">
+              <div class="cm-photo-frame"></div>
+              <div class="cm-photo-label">CRIMINAL PROFILE</div>
+            </div>
+            <div class="cm-status-pill" id="cmStatus">WANTED</div>
+            <div class="cm-case-badge" id="cmCaseNo">CASE #</div>
+          </div>
+
+          <!-- Right: details -->
+          <div class="cm-detail-col">
+            <div class="cm-name" id="cmName">Name</div>
+            <div class="cm-alias" id="cmAlias">"Alias"</div>
+
+            <div class="cm-section-title">🔍 CRIME DETAILS</div>
+            <div class="cm-row">
+              <div class="cm-field">Crime Type</div>
+              <div class="cm-value" id="cmCrime">—</div>
+            </div>
+            <div class="cm-row">
+              <div class="cm-field">IPC Sections</div>
+              <div class="cm-value" id="cmSection">—</div>
+            </div>
+            <div class="cm-row">
+              <div class="cm-field">Age at Time</div>
+              <div class="cm-value" id="cmAge">—</div>
+            </div>
+            <div class="cm-row">
+              <div class="cm-field">📍 Location</div>
+              <div class="cm-value" id="cmArea">—</div>
+            </div>
+
+            <div class="cm-section-title" style="margin-top:16px"> CASE DESCRIPTION</div>
+            <div class="cm-description" id="cmDetail">—</div>
+
+            <div class="cm-section-title" style="margin-top:16px"> CURRENT STATUS</div>
+            <div class="cm-status-detail" id="cmStatusDetail">—</div>
+          </div>
+        </div>
+
+        <div class="cm-footer">
+          <span>⚠ This profile contains information from publicly available official records and news reports</span>
+          <span>NCRB • Court Records • Police Files</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

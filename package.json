@@ -1,0 +1,13 @@
+{
+  "name": "crimezone-safety-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CrimeZone public safety dashboard and server-protected incident review portal",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}
