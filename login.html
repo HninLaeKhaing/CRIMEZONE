@@ -758,6 +758,7 @@
       display: none
     }
   </style>
+  <link rel="stylesheet" href="safety-chatbot.css" />
 </head>
 
 <body>
@@ -1118,6 +1119,7 @@
       if (s) { try { const a = JSON.parse(s); if (Date.now() - a.ts < 8 * 3600 * 1000) { doScan(); setTimeout(() => showSuccess(a.role), 200); setTimeout(() => { window.location.href = 'crime-map.html'; }, 1800); } else { sessionStorage.removeItem('cz_auth'); localStorage.removeItem('cz_auth'); } } catch (e) { } }
     })();
   </script>
+  <script src="safety-chatbot.js" defer></script>
 </body>
 
 </html>

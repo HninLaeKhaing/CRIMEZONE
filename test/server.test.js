@@ -73,8 +73,8 @@ test('protects admin data and records report review actions', async (t) => {
     const response = await fetch(`${baseUrl}${page}`);
     assert.equal(response.status, 200, `${page} should load`);
     const html = await response.text();
-    assert.match(html, /\/safety-chatbot\.css/, `${page} should include chatbot styles`);
-    assert.match(html, /\/safety-chatbot\.js/, `${page} should include chatbot behavior`);
+    assert.match(html, /(?:\/|\.\.\/|\.\/)?safety-chatbot\.css/, `${page} should include chatbot styles`);
+    assert.match(html, /(?:\/|\.\.\/|\.\/)?safety-chatbot\.js/, `${page} should include chatbot behavior`);
   }
   const chatbotScript = await fetch(`${baseUrl}/safety-chatbot.js`);
   assert.equal(chatbotScript.status, 200);

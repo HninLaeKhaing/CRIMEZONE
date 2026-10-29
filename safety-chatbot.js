@@ -1,6 +1,7 @@
 'use strict';
 
 (() => {
+  const assetUrl = (fileName) => new URL(fileName, document.currentScript.src).href;
   const root = document.createElement('aside');
   root.id = 'cz-safety-chat';
   root.setAttribute('aria-label', 'CrimeZone safety chatbot');
@@ -8,7 +9,7 @@
     <section class="cz-chat-panel" id="cz-chat-panel" role="dialog" aria-labelledby="cz-chat-title" aria-modal="false" hidden>
       <header class="cz-chat-header">
         <div class="cz-chat-heading">
-          <img class="cz-chat-avatar" src="/Neon%20Shielded%20Woman%20App%20Icon.png" alt="" />
+          <img class="cz-chat-avatar" src="${assetUrl('Neon%20Shielded%20Woman%20App%20Icon.png')}" alt="" />
           <div>
             <h2 class="cz-chat-title" id="cz-chat-title">CrimeZone Safety Guide</h2>
             <p class="cz-chat-subtitle">Practical safety information</p>
@@ -36,7 +37,7 @@
       </form>
     </section>
     <button class="cz-chat-launcher" type="button" aria-label="Open CrimeZone safety chat. Drag to move or hold Shift and use the arrow keys." aria-controls="cz-chat-panel" aria-expanded="false">
-      <img src="/Neon%20Shielded%20Woman%20App%20Icon.png" alt="" />
+      <img src="${assetUrl('Neon%20Shielded%20Woman%20App%20Icon.png')}" alt="" />
     </button>`;
   document.body.append(root);
 

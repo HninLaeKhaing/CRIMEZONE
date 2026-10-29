@@ -116,14 +116,12 @@ function sendFile(response, filePath) {
 
   if (path.extname(filePath).toLowerCase() === '.html') {
     let html = fs.readFileSync(filePath, 'utf8');
-    html = html.replace(
-      '</head>',
-      '  <link rel="stylesheet" href="/safety-chatbot.css" />\n</head>',
-    );
-    html = html.replace(
-      '</body>',
-      '  <script src="/safety-chatbot.js" defer></script>\n</body>',
-    );
+    if (!html.includes('safety-chatbot.css')) {
+      html = html.replace('</head>', '  <link rel="stylesheet" href="/safety-chatbot.css" />\n</head>');
+    }
+    if (!html.includes('safety-chatbot.js')) {
+      html = html.replace('</body>', '  <script src="/safety-chatbot.js" defer></script>\n</body>');
+    }
     response.writeHead(200, {
       'Cache-Control': 'no-cache',
       'Content-Type': contentType,
